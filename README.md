@@ -1,4 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lanceraa - Nepal's Premier Freelancing Platform
+
+## About Lanceraa
+Lanceraa is a specialized freelancing platform built specifically for Nepal's growing digital workforce. It connects individual clients, companies, and freelancers in a seamless ecosystem where:
+
+- Students can outsource their academic assignments
+- Companies can hire freelancers for projects
+- Freelancers can showcase their work and find opportunities
+
+### Key Features
+- Multi-user types (Individual, Company, Freelancer)
+- Real-time messaging 
+- Project/Task posting and bidding
+- Portfolio showcase
+- Mobile-first responsive design
+
+
+## Tech Stack
+- Frontend: Next.js 14+ with TypeScript
+- Styling: TailwindCSS
+- Backend: FastAPI
+- Database: PostgreSQL
+- Real-time: WebSocket
+- State Management: Zustand
+
+## Project Structure
+```bash
+src/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/page.tsx
+│   │   ├── register/page.tsx
+│   │   └── register/[type]/page.tsx
+│   ├── dashboard/
+│   │   ├── page.tsx
+│   │   ├── works/page.tsx
+│   │   ├── freelancers/page.tsx
+│   │   ├── messages/page.tsx
+│   │   └── profile/page.tsx
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── layout/
+│   │   ├── TopNavbar.tsx
+│   │   └── BottomNavbar.tsx
+│   └── shared/
+│       ├── Button.tsx
+│       └── Card.tsx
+└── styles/
+    └── globals.css
+```
 
 ## Getting Started
 
