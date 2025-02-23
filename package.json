@@ -6,9 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "clean": "rd /s /q .next && rd /s /q node_modules",
-    "fresh": "npm run clean && npm install && npm run build"
+    "lint": "next lint"
   },
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.0.6",
@@ -27,7 +25,8 @@
     "eslint-config-next": "15.1.7",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "cssnano": "^6.0.1"
   },
   "browserslist": [
     ">0.2%",
@@ -35,7 +34,6 @@
     "not op_mini all"
   ],
   "engines": {
-    "node": "18.17.0",
-    "npm": ">=9.0.0"
+    "node": "18.x"
   }
 }
