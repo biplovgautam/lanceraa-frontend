@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "../styles/globals.css";
+import "@/styles/globals.css";
 import { ThemeProvider } from '@/components/theme-provider';
 import TopNavbar from '@/components/layout/TopNavbar';
 import Footer from '@/components/layout/Footer';
@@ -16,8 +16,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Lanceraa - Freelance Platform",
+  title: {
+    default: "Lanceraa - Freelance Platform",
+    template: "%s | Lanceraa"
+  },
   description: "Find your next freelance opportunity",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" }
+  ]
 };
 
 export default function RootLayout({
@@ -26,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
           <TopNavbar />
