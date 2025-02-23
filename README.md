@@ -25,29 +25,31 @@ Lanceraa is a specialized freelancing platform built specifically for Nepal's gr
 
 ## Project Structure
 ```bash
-src/
-├── app/
-│   ├── (auth)/
-│   │   ├── login/page.tsx
-│   │   ├── register/page.tsx
-│   │   └── register/[type]/page.tsx
-│   ├── dashboard/
-│   │   ├── page.tsx
-│   │   ├── works/page.tsx
-│   │   ├── freelancers/page.tsx
-│   │   ├── messages/page.tsx
-│   │   └── profile/page.tsx
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/
-│   ├── layout/
-│   │   ├── TopNavbar.tsx
-│   │   └── BottomNavbar.tsx
-│   └── shared/
-│       ├── Button.tsx
-│       └── Card.tsx
-└── styles/
-    └── globals.css
+lanceraa-frontend/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx               # Root layout with theme providers
+│   │   ├── page.tsx                 # Homepage
+│   │   └── profile/
+│   │       └── page.tsx             # Profile page
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── TopNavbar.tsx       # Navigation component
+│   │   │   └── Footer.tsx          # Footer component
+│   │   └── theme-provider.tsx       # Theme context and provider
+│   └── styles/
+│       └── globals.css             # Global styles and Tailwind imports
+├── public/
+│   └── favicon.ico                 # Favicon
+├── .nvmrc                         # Node version config
+├── .npmrc                         # NPM configuration
+├── next.config.ts                 # Next.js configuration
+├── postcss.config.mjs             # PostCSS configuration
+├── tailwind.config.ts            # Tailwind CSS configuration
+├── tsconfig.json                 # TypeScript configuration
+├── package.json                  # Project dependencies and scripts
+└── .gitignore                   # Git ignore rules
+
 ```
 
 ## Getting Started

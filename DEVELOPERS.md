@@ -26,30 +26,32 @@ The Lanceraa frontend is built with the following technologies:
 ## Project Structure
 The frontend is organized as follows:
 
-```
-src/
-├── app/                    # Routing and pages using Next.js App Router
-│   ├── (auth)/             # Authentication routes
-│   │   ├── login/page.tsx
-│   │   ├── register/page.tsx
-│   │   └── register/[type]/page.tsx  # Dynamic registration by user type
-│   ├── dashboard/          # Authenticated user dashboard
-│   │   ├── page.tsx        # Main dashboard
-│   │   ├── works/page.tsx  # Task management
-│   │   ├── freelancers/page.tsx  # Freelancer directory
-│   │   ├── messages/page.tsx  # Messaging
-│   │   └── profile/page.tsx  # User profile
-│   ├── layout.tsx          # Root layout with Top and BottomNavbar
-│   └── page.tsx            # Landing page for unauthenticated users
-├── components/             # Reusable UI components
-│   ├── layout/
-│   │   ├── TopNavbar.tsx   # Top navigation bar
-│   │   └── BottomNavbar.tsx  # Bottom navigation bar (mobile)
-│   └── shared/
-│       ├── Button.tsx      # Reusable button component
-│       └── Card.tsx        # Reusable card component
-└── styles/
-    └── globals.css         # Tailwind directives and global styles
+```bash
+lanceraa-frontend/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx               # Root layout with theme providers
+│   │   ├── page.tsx                 # Homepage
+│   │   └── profile/
+│   │       └── page.tsx             # Profile page
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── TopNavbar.tsx       # Navigation component
+│   │   │   └── Footer.tsx          # Footer component
+│   │   └── theme-provider.tsx       # Theme context and provider
+│   └── styles/
+│       └── globals.css             # Global styles and Tailwind imports
+├── public/
+│   └── favicon.ico                 # Favicon
+├── .nvmrc                         # Node version config
+├── .npmrc                         # NPM configuration
+├── next.config.ts                 # Next.js configuration
+├── postcss.config.mjs             # PostCSS configuration
+├── tailwind.config.ts            # Tailwind CSS configuration
+├── tsconfig.json                 # TypeScript configuration
+├── package.json                  # Project dependencies and scripts
+└── .gitignore                   # Git ignore rules
+
 ```
 
 ### How It Works
