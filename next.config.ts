@@ -11,14 +11,7 @@ const nextConfig: NextConfig = {
   // Build optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
-  },
-  
-  // Experimental features
-  experimental: {
-    optimizeCss: true,
-    webpackBuildWorker: true
-  },
-
+  }
 }
 
 export default nextConfig
