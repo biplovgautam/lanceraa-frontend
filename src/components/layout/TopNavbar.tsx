@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { Sun, Moon } from "lucide-react";
-import { useTheme } from "@/components/theme-provider";
+import { useThemeContext } from "@/components/theme-provider";
 
 export default function TopNavbar() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useThemeContext();
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-[var(--navbar)] text-[var(--navbar-foreground)] shadow-sm z-10">

@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
+import { useTheme as useNextTheme } from 'next-themes'
 
 type Theme = 'light' | 'dark'
 
@@ -12,34 +13,35 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light')
+  const { theme: nextTheme, setTheme } = useNextTheme()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Check for system preference or stored preference
-    const storedTheme = localStorage.getItem('theme') as Theme
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-    setTheme(storedTheme || systemTheme)
+    setMounted(true)
   }, [])
 
-  useEffect(() => {
-    // Update data-theme attribute and store preference
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
-  }, [theme])
-
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light')
+    setTheme(nextTheme === 'light' ? 'dark' : 'light')
+  }
+
+  if (!mounted) {
+    return null
   }
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    <div suppressHydrationWarning>
+      <ThemeContext.Provider value={{ 
+        theme: (nextTheme as Theme) || 'light', 
+        toggleTheme 
+      }}>
+        {children}
+      </ThemeContext.Provider>
+    </div>
   )
 }
 
-export const useTheme = () => {
+export const useThemeContext = () => {
   const context = useContext(ThemeContext)
-  if (!context) throw new Error('useTheme must be used within a ThemeProvider')
+  if (!context) throw new Error('useThemeContext must be used within a ThemeProvider')
   return context
 }
