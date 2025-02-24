@@ -9,11 +9,11 @@ export default function ProfilePage() {
           <div className="grid gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Name</label>
-              <p className="mt-1">John Doe</p>
+              <p className="mt-1">Kripesh Tiwari</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Email</label>
-              <p className="mt-1">john@example.com</p>
+              <p className="mt-1">kripesh@example.com</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Role</label>

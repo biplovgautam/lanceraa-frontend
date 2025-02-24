@@ -57,16 +57,18 @@ export default function TopNavbar() {
                 <Moon className="h-5 w-5" />
               )}
             </button>
-            <button
-              className="flex items-center space-x-2 bg-[var(--accent)] text-[var(--text)] 
-              px-3.5 py-1.5 rounded-md transition-all duration-300 ease-in-out scale-95
-              hover:shadow-[0_0_15px_rgba(109,136,213,0.5)] 
-              dark:hover:shadow-[0_0_15px_rgba(42,70,146,0.5)]
-              hover:scale-100 transform origin-center"
-            >
-              <span>Sign up</span>
-              <UserRoundPlus className="h-4.5 w-4.5" />
-            </button>
+            <Link href="/signup">
+              <button
+                className="flex items-center space-x-2 bg-[var(--accent)] text-[var(--text)] 
+                px-3.5 py-1.5 rounded-md transition-all duration-300 ease-in-out scale-95
+                hover:shadow-[0_0_15px_rgba(109,136,213,0.5)] 
+                dark:hover:shadow-[0_0_15px_rgba(42,70,146,0.5)]
+                hover:scale-100 transform origin-center"
+              >
+                <span>Sign up</span>
+                <UserRoundPlus className="h-4.5 w-4.5" />
+              </button>
+            </Link>
           </div>
         </div>
       </div>
