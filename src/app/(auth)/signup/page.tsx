@@ -22,12 +22,14 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('Form submission started')
     
     // Reset alert
     setAlert({ show: false, type: '', message: '' })
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
+      console.log('Password validation failed: passwords do not match')
       setAlert({
         show: true,
         type: 'error',
@@ -39,11 +41,15 @@ export default function SignupPage() {
     try {
       const { confirmPassword, ...signupData } = formData
       
-      console.log('Sending request to:', `${config.apiUrl}/signup`)
+      const apiEndpoint = `${config.apiUrl}/api/auth/signup`
+      console.log('API Config:', {
+        baseUrl: config.apiUrl,
+        fullEndpoint: apiEndpoint
+      })
       console.log('Request data:', signupData)
       
-      // Remove the extra slash in the URL
-      const response = await fetch(`${config.apiUrl}/signup`, {
+      console.log('Starting fetch request...')
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,11 +58,25 @@ export default function SignupPage() {
         body: JSON.stringify(signupData),
       })
       
-      console.log('Response status:', response.status)
-      const data = await response.json()
-      console.log('Response data:', data)
+      console.log('Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      })
+
+      let data
+      try {
+        data = await response.json()
+        console.log('Response data:', data)
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError)
+        const text = await response.text()
+        console.log('Raw response text:', text)
+        throw new Error('Failed to parse response')
+      }
       
       if (response.ok) {
+        console.log('Signup successful, redirecting...')
         setAlert({
           show: true,
           type: 'success',
@@ -74,6 +94,10 @@ export default function SignupPage() {
           window.location.href = '/login'
         }, 2000)
       } else {
+        console.error('Signup failed:', {
+          status: response.status,
+          data: data
+        })
         setAlert({
           show: true,
           type: 'error',
@@ -81,7 +105,11 @@ export default function SignupPage() {
         })
       }
     } catch (error) {
-      console.error('API Error:', error)
+      console.error('API Error:', {
+        name: error instanceof Error ? error.name : 'Unknown error',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      })
       setAlert({
         show: true,
         type: 'error',
