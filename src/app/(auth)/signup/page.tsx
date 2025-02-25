@@ -42,6 +42,7 @@ export default function SignupPage() {
       console.log('Sending request to:', `${config.apiUrl}/api/auth/signup`)
       console.log('Request data:', signupData)
       
+      // Remove the extra slash in the URL
       const response = await fetch(`${config.apiUrl}/api/auth/signup`, {
         method: 'POST',
         headers: {
@@ -80,7 +81,7 @@ export default function SignupPage() {
         })
       }
     } catch (error) {
-      console.error('Signup error:', error)
+      console.error('API Error:', error)
       setAlert({
         show: true,
         type: 'error',
