@@ -39,11 +39,11 @@ export default function SignupPage() {
     try {
       const { confirmPassword, ...signupData } = formData
       
-      console.log('Sending request to:', `${config.apiUrl}/api/auth/signup`)
+      console.log('Sending request to:', `${config.apiUrl}/signup`)
       console.log('Request data:', signupData)
       
       // Remove the extra slash in the URL
-      const response = await fetch(`${config.apiUrl}/api/auth/signup`, {
+      const response = await fetch(`${config.apiUrl}/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
