@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { Sun, Moon, UserRoundPlus, Search, Bell, X } from "lucide-react";
 import { useThemeContext } from "@/components/theme-provider";
-import { useAuth } from "@/context/auth-context"; // Add this import
+import { useAuth } from "@/context/auth-context";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from 'next/navigation';
 
 export default function TopNavbar() {
   const { theme, toggleTheme } = useThemeContext();
-  const { user } = useAuth(); // Add this line
+  const { user } = useAuth();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -32,6 +32,11 @@ export default function TopNavbar() {
       default:
         return 'Search Lanceraa...';
     }
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return '?';
+    return name.charAt(0).toUpperCase();
   };
 
   useEffect(() => {
@@ -137,7 +142,24 @@ export default function TopNavbar() {
               )}
             </button>
 
-            {!user && (
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <button
+                  className="p-2 rounded-full hover:bg-[var(--accent)]/10 text-[var(--text)]"
+                  aria-label="Notifications"
+                >
+                  <Bell className="h-6 w-6" />
+                </button>
+                <Link href="/profile">
+                  <div 
+                    className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center text-white"
+                    title={user.fullName || user.username}
+                  >
+                    {getInitials(user.fullName || user.username)}
+                  </div>
+                </Link>
+              </div>
+            ) : (
               <Link href="/signup">
                 <button
                   className="flex items-center space-x-2 bg-[var(--accent)] text-[var(--text)] 
@@ -148,15 +170,6 @@ export default function TopNavbar() {
                   <UserRoundPlus className="h-5 w-5" />
                 </button>
               </Link>
-            )}
-
-            {user && (
-              <button
-                className="p-2 rounded-full hover:bg-[var(--accent)]/10 text-[var(--text)]"
-                aria-label="Notifications"
-              >
-                <Bell className="h-6 w-6" />
-              </button>
             )}
           </div>
         </div>

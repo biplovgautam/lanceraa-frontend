@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import { Home, Briefcase, Plus, Users, User } from "lucide-react";
+import { Home, Briefcase, Plus, UsersRound, UserRound } from "lucide-react";
 import { usePathname } from 'next/navigation';
 
 export default function BottomNavbar() {
@@ -39,16 +39,16 @@ export default function BottomNavbar() {
         </button>
 
         <Link href="/freelancers" className="flex flex-col items-center">
-          <Users
+          <UsersRound
             className={`h-6 w-6 ${isActive('/freelancers') ? 'text-[var(--accent)]' : 'text-[var(--text)]'}`}
           />
           <span className={`text-xs mt-1 ${isActive('/freelancers') ? 'text-[var(--accent)]' : 'text-[var(--text)]'}`}>
-            Freelancers
+            Lancers
           </span>
         </Link>
 
         <Link href="/profile" className="flex flex-col items-center">
-          <User
+          <UserRound
             className={`h-6 w-6 ${isActive('/profile') ? 'text-[var(--accent)]' : 'text-[var(--text)]'}`}
           />
           <span className={`text-xs mt-1 ${isActive('/profile') ? 'text-[var(--accent)]' : 'text-[var(--text)]'}`}>
