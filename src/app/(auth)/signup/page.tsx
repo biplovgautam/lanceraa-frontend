@@ -120,7 +120,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-      <div className="bg-[var(--accent)] p-8 rounded-lg shadow-lg w-full max-w-md">
+      <div className="bg-[var(--primary)] p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-[var(--background)]">Create Account</h2>
         
         {/* Alert Message */}
