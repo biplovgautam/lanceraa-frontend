@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -8,8 +8,15 @@ import { Mail, Lock, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, error } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, login, error, isLoading } = useAuth();
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      router.push('/');
+    }
+  }, [user, router]);
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -17,15 +24,12 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
       await login(formData.email, formData.password);
       router.push('/');
     } catch (err) {
       console.error('Login failed:', err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
