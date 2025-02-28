@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -9,6 +9,7 @@ import { FormDataSchema } from '@/lib/schema'
 import { CheckIcon } from 'lucide-react'
 import { signupUser } from '@/lib/api';
 import { SignupData } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 
 type Inputs = z.infer<typeof FormDataSchema>
 
@@ -37,10 +38,15 @@ const steps = [
 ]
 
 export default function SignupForm() {
+  const router = useRouter();
+  
   const [currentStep, setCurrentStep] = useState(0)
   const [delta, setDelta] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [passwordsMatch, setPasswordsMatch] = useState(true)
+  const [signupSuccess, setSignupSuccess] = useState(false)
+  const [signupData, setSignupData] = useState<{email: string, username: string} | null>(null)
 
   const {
     register,
@@ -55,11 +61,28 @@ export default function SignupForm() {
 
   // Watch form values for validation
   const watchedFields = watch()
+  const password = watch('password')
+  const confirmPassword = watch('confirmPassword')
+
+  // Check if passwords match
+  useEffect(() => {
+    if (password && confirmPassword) {
+      setPasswordsMatch(password === confirmPassword)
+    }
+  }, [password, confirmPassword])
 
   // Check if current step fields are valid
   const currentFields = steps[currentStep]?.fields || []
   const isCurrentStepValid = currentFields.every(
-    field => dirtyFields[field as keyof Inputs] && !errors[field as keyof Inputs]
+    field => {
+      // Special case for confirmPassword to check if passwords match
+      if (field === 'confirmPassword') {
+        return dirtyFields[field as keyof Inputs] && 
+               !errors[field as keyof Inputs] && 
+               passwordsMatch;
+      }
+      return dirtyFields[field as keyof Inputs] && !errors[field as keyof Inputs]
+    }
   )
 
   const next = async () => {
@@ -67,6 +90,11 @@ export default function SignupForm() {
     
     if (!fields) return // Handle last step case
     
+    // Add password match validation for step 1
+    if (currentStep === 0 && password !== confirmPassword) {
+      return // Don't proceed if passwords don't match
+    }
+
     const output = await trigger(fields as Array<keyof Inputs>)
     console.log('Validation result:', output, 'for fields:', fields)
 
@@ -102,6 +130,13 @@ export default function SignupForm() {
         const response = await signupUser(signupData)
         console.log('Signup successful:', response)
         setCurrentStep(steps.length - 1)
+        
+        // Store signup data for login redirect
+        setSignupSuccess(true)
+        setSignupData({
+          email: formData.email,
+          username: formData.username
+        })
         
       } catch (error) {
         console.error('Signup error:', error)
@@ -155,6 +190,17 @@ export default function SignupForm() {
     } catch (error) {
       console.error('Form submission error:', error);
       // Handle error (show error message to user)
+    }
+  };
+
+  const redirectToLogin = () => {
+    if (signupData?.email) {
+      // Redirect to login with username/email prefilled
+      const loginParam = encodeURIComponent(signupData.username || signupData.email);
+      router.push(`/login?username=${loginParam}`);
+    } else {
+      // Fallback if no email is available
+      router.push('/login');
     }
   };
 
@@ -267,10 +313,13 @@ export default function SignupForm() {
                   {...register('confirmPassword')}
                   id='confirmPassword'
                   type='password'
-                  className='input-field'
+                  className={`input-field ${confirmPassword && !passwordsMatch ? 'border-red-500' : ''}`}
                 />
                 {errors.confirmPassword && (
                   <p className='text-sm text-red-500'>{errors.confirmPassword.message}</p>
+                )}
+                {confirmPassword && !passwordsMatch && !errors.confirmPassword && (
+                  <p className='text-sm text-red-500'>Passwords do not match</p>
                 )}
               </div>
             </div>
@@ -530,12 +579,23 @@ export default function SignupForm() {
             transition={{ duration: 0.3 }}
             className='space-y-6 text-center'
           >
+            <div className="flex justify-center mb-6">
+              <div className="bg-green-100 rounded-full p-2">
+                <CheckIcon className="h-10 w-10 text-green-600" />
+              </div>
+            </div>
             <h2 className='text-xl font-semibold text-[var(--text)]'>
-              Complete
+              Account Created Successfully!
             </h2>
-            <p className='text-[var(--text-secondary)]'>
-              Thank you for signing up! Your account has been created successfully.
+            <p className='text-[var(--text-secondary)] mb-8'>
+              Your account has been created. You can now log in to access your dashboard.
             </p>
+            <button
+              onClick={redirectToLogin}
+              className="btn-primary w-full sm:w-auto px-8"
+            >
+              Go to Login
+            </button>
           </motion.div>
         )}
       </form>
@@ -550,36 +610,45 @@ export default function SignupForm() {
           )}
           
           <div className='flex w-full sm:w-auto justify-between items-center gap-4'>
-            <button
-              type='button'
-              onClick={prev}
-              disabled={currentStep === 0 || isSubmitting}
-              className={`btn-secondary ${(currentStep === 0 || isSubmitting) ? 'opacity-50' : ''}`}
-            >
-              Back
-            </button>
+            {currentStep !== 4 && (
+              <>
+                <button
+                  type='button'
+                  onClick={prev}
+                  disabled={currentStep === 0 || isSubmitting}
+                  className={`btn-secondary ${(currentStep === 0 || isSubmitting) ? 'opacity-50' : ''}`}
+                >
+                  Back
+                </button>
 
-            <div className='text-sm text-[var(--text-secondary)]'>
-              Step {currentStep + 1} of {steps.length}
-            </div>
+                <div className='text-sm text-[var(--text-secondary)]'>
+                  Step {currentStep + 1} of {steps.length}
+                </div>
 
-            <button
-              type='button'
-              onClick={next}
-              disabled={!isCurrentStepValid || currentStep === steps.length - 1 || isSubmitting}
-              className={`btn-primary ${(!isCurrentStepValid || isSubmitting) ? 'opacity-50' : ''}`}
-            >
-              {isSubmitting ? (
-                <span className='flex items-center gap-2'>
-                  <span className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'/>
-                  Submitting...
-                </span>
-              ) : currentStep === steps.length - 2 ? (
-                'Complete'
-              ) : (
-                'Next'
-              )}
-            </button>
+                <button
+                  type='button'
+                  onClick={next}
+                  disabled={
+                    !isCurrentStepValid || 
+                    currentStep === steps.length - 1 || 
+                    isSubmitting || 
+                    (currentStep === 0 && confirmPassword && !passwordsMatch)
+                  }
+                  className={`btn-primary ${(!isCurrentStepValid || isSubmitting || (currentStep === 0 && confirmPassword && !passwordsMatch)) ? 'opacity-50' : ''}`}
+                >
+                  {isSubmitting ? (
+                    <span className='flex items-center gap-2'>
+                      <span className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'/>
+                      Submitting...
+                    </span>
+                  ) : currentStep === steps.length - 2 ? (
+                    'Complete'
+                  ) : (
+                    'Next'
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
