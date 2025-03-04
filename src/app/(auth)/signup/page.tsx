@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Mail, Lock, ArrowRight, Check, ArrowLeft } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Mail, Lock, ArrowRight, Check, ArrowLeft, X } from 'lucide-react'
 import { config } from '@/config'
 
 export default function SignupPage() {
@@ -21,6 +21,15 @@ export default function SignupPage() {
     message: ''
   })
 
+  // Add password validation state
+  const [passwordValidation, setPasswordValidation] = useState({
+    minLength: false,
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false,
+    hasSpecial: false
+  })
+
   // Email validation function
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -32,6 +41,42 @@ export default function SignupPage() {
     // At least 8 characters, contains uppercase, lowercase, number and special character
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
     return passwordRegex.test(password)
+  }
+
+  // Check password requirements as user types
+  useEffect(() => {
+    const password = formData.password
+    
+    setPasswordValidation({
+      minLength: password.length >= 8,
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSpecial: /[@$!%*?&]/.test(password)
+    })
+  }, [formData.password])
+
+  // Calculate overall password strength
+  const passwordStrength = Object.values(passwordValidation).filter(Boolean).length
+
+  // Get the first missing requirement (if any)
+  const getFirstMissingRequirement = () => {
+    if (!passwordValidation.minLength) {
+      return { type: 'minLength', message: 'Password must be at least 8 characters' }
+    }
+    if (!passwordValidation.hasUppercase) {
+      return { type: 'hasUppercase', message: 'Add at least 1 uppercase letter (A-Z)' }
+    }
+    if (!passwordValidation.hasLowercase) {
+      return { type: 'hasLowercase', message: 'Add at least 1 lowercase letter (a-z)' }
+    }
+    if (!passwordValidation.hasSpecial) {
+      return { type: 'hasSpecial', message: 'Add at least 1 special character (@$!%*?&)' }
+    }
+    if (!passwordValidation.hasNumber) {
+      return { type: 'hasNumber', message: 'Add at least 1 number (0-9)' }
+    }
+    return null
   }
 
   // Handler for step 1 - Email validation
@@ -320,30 +365,113 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Password requirements */}
-            <div className="text-xs text-[var(--background)] opacity-70 p-2 bg-[var(--background)] bg-opacity-10 rounded-md">
-              <p className="mb-1">Password requirements:</p>
-              <ul className="list-disc pl-5 space-y-0.5">
-                <li>At least 8 characters</li>
-                <li>At least 1 uppercase letter (A-Z)</li>
-                <li>At least 1 lowercase letter (a-z)</li>
-                <li>At least 1 number (0-9)</li>
-                <li>At least 1 special character (@$!%*?&)</li>
-              </ul>
-            </div>
+            {/* Password strength indicator */}
+            {formData.password && (
+              <div className="mb-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-xs text-[var(--background)]">
+                    Password Strength: {
+                      passwordStrength === 0 ? 'Very Weak' :
+                      passwordStrength <= 2 ? 'Weak' :
+                      passwordStrength <= 4 ? 'Moderate' :
+                      'As Strong As You!'
+                    }
+                  </span>
+                  <span className="text-xs text-[var(--background)]">
+                    {passwordStrength}/5
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-[var(--background)] bg-opacity-20 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full ${
+                      passwordStrength <= 2 ? 'bg-red-500' : 
+                      passwordStrength <= 4 ? 'bg-yellow-500' : 
+                      'bg-green-500'
+                    }`}
+                    style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
+
+            {/* Sequential requirement validation */}
+            {formData.password && (
+              <div className="bg-[var(--background)] bg-opacity-10 rounded-md p-3">
+                {(() => {
+                  // First check if any requirement is missing
+                  const missingRequirement = getFirstMissingRequirement()
+                  
+                  if (missingRequirement) {
+                    // Show the first missing requirement
+                    return (
+                      <div className="flex items-center text-xs">
+                        <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-yellow-500 text-white">
+                          <X size={12} />
+                        </span>
+                        <span className="text-[var(--text)]">{missingRequirement.message}</span>
+                      </div>
+                    )
+                  } 
+                  
+                  // If no requirements are missing and confirmation doesn't match
+                  else if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
+                    return (
+                      <div className="flex items-center text-xs">
+                        <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-red-500 text-white">
+                          <X size={12} />
+                        </span>
+                        <span className="text-red-400">Passwords do not match</span>
+                      </div>
+                    )
+                  }
+                  
+                  // If password requirements are met and confirmation password matches
+                  else if (formData.confirmPassword && formData.password === formData.confirmPassword) {
+                    return (
+                      <div className="flex items-center text-xs">
+                        <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-[var(--accent)] text-white">
+                          <Check size={12} />
+                        </span>
+                        <span className="text-[var(--accent)]">You're good to go!</span>
+                      </div>
+                    )
+                  }
+                  
+                  // If password requirements are met but no confirmation password yet
+                  else if (Object.values(passwordValidation).every(Boolean)) {
+                    return (
+                      <div className="flex items-center text-xs">
+                        <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-green-500 text-white">
+                          <Check size={12} />
+                        </span>
+                        <span className="text-[var(--text)]">Password meets all requirements. Please confirm it.</span>
+                      </div>
+                    )
+                  }
+                  
+                  return null
+                })()}
+              </div>
+            )}
 
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={handleBack}
-                className="w-12 flex items-center justify-center bg-[var(--background)] bg-opacity-50 text-[var(--background)] py-3 rounded-md hover:bg-opacity-60 transition-opacity"
+                className="w-12 flex items-center justify-center bg-[var(--background)] bg-opacity-50 text-[var(--text)] py-3 rounded-md hover:bg-opacity-60 transition-opacity"
               >
                 <ArrowLeft size={16} />
               </button>
               
               <button
                 type="submit"
-                disabled={isSubmitting || !formData.password || !formData.confirmPassword}
+                disabled={
+                  isSubmitting || 
+                  !formData.password || 
+                  !formData.confirmPassword ||
+                  formData.password !== formData.confirmPassword ||
+                  !Object.values(passwordValidation).every(Boolean)
+                }
                 className="flex-1 flex items-center justify-center bg-[var(--background)] text-[var(--accent)] py-3 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Creating Account...' : 'Create Account'}
