@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Mail, Lock, ArrowRight, Check, ArrowLeft, X } from 'lucide-react'
 import { config } from '@/config'
+import Link from 'next/link'
 
 export default function SignupPage() {
   const [currentStep, setCurrentStep] = useState(1)
@@ -21,7 +22,6 @@ export default function SignupPage() {
     message: ''
   })
 
-  // Add password validation state
   const [passwordValidation, setPasswordValidation] = useState({
     minLength: false,
     hasUppercase: false,
@@ -30,20 +30,16 @@ export default function SignupPage() {
     hasSpecial: false
   })
 
-  // Email validation function
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
   }
 
-  // Password strength validation
   const isStrongPassword = (password: string) => {
-    // At least 8 characters, contains uppercase, lowercase, number and special character
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
     return passwordRegex.test(password)
   }
 
-  // Check password requirements as user types
   useEffect(() => {
     const password = formData.password
     
@@ -56,10 +52,8 @@ export default function SignupPage() {
     })
   }, [formData.password])
 
-  // Calculate overall password strength
   const passwordStrength = Object.values(passwordValidation).filter(Boolean).length
 
-  // Get the first missing requirement (if any)
   const getFirstMissingRequirement = () => {
     if (!passwordValidation.minLength) {
       return { type: 'minLength', message: 'Password must be at least 8 characters' }
@@ -79,14 +73,11 @@ export default function SignupPage() {
     return null
   }
 
-  // Handler for step 1 - Email validation
   const handleCheckEmail = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Reset alert
     setAlert({ show: false, type: '', message: '' })
 
-    // Validate email format
     if (!isValidEmail(formData.email)) {
       setAlert({
         show: true,
@@ -99,7 +90,6 @@ export default function SignupPage() {
     setIsCheckingEmail(true)
 
     try {
-      // Check if email already exists
       const apiEndpoint = `${config.apiUrl}/api/auth/check-email`
       const response = await fetch(apiEndpoint, {
         method: 'POST',
@@ -111,13 +101,10 @@ export default function SignupPage() {
 
       const data = await response.json()
       
-      // Handle the response according to our EmailExists schema
       if (response.ok) {
         if (data.exists === false) {
-          // Email is available, proceed to next step
           setCurrentStep(2)
         } else {
-          // Email already exists
           setAlert({
             show: true,
             type: 'error',
@@ -125,7 +112,6 @@ export default function SignupPage() {
           })
         }
       } else {
-        // API error
         setAlert({
           show: true,
           type: 'error',
@@ -135,7 +121,6 @@ export default function SignupPage() {
     } catch (error) {
       console.error('Error checking email:', error)
       
-      // For development purposes, show detailed error
       setAlert({
         show: true,
         type: 'error',
@@ -146,14 +131,11 @@ export default function SignupPage() {
     }
   }
 
-  // Main signup handler (step 2)
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Reset alert
     setAlert({ show: false, type: '', message: '' })
 
-    // Validate password strength
     if (!isStrongPassword(formData.password)) {
       setAlert({
         show: true,
@@ -163,7 +145,6 @@ export default function SignupPage() {
       return
     }
 
-    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setAlert({
         show: true,
@@ -209,26 +190,18 @@ export default function SignupPage() {
           message: data.message || 'Account created! Redirecting to verification page...'
         })
         
-        // Clear sensitive data
         setFormData({
           ...formData,
           password: '',
           confirmPassword: ''
         })
         
-        // Store user ID in localStorage for better persistence
         localStorage.setItem('verification_user_id', data.user_id);
         
         console.log("Signup successful, redirecting to verification with user_id:", data.user_id);
         
-        // Use router for more reliable navigation
         setTimeout(() => {
-          // Two options:
-          // Option 1: window.location (hard navigation)
           window.location.href = `/verify-email/${data.user_id}`;
-          
-          // Option 2: Use Next.js router (if imported)
-          // router.push(`/verify-email/${data.user_id}`);
         }, 2000);
       } else {
         setAlert({
@@ -249,236 +222,265 @@ export default function SignupPage() {
     }
   }
 
-  // Handle back button in step 2
   const handleBack = () => {
     setCurrentStep(1)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-      <div className="bg-[var(--primary)] p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-2 text-center text-[var(--background)]">Create Account</h2>
-        
-        {/* Step indicator */}
-        <div className="flex items-center justify-center mb-6">
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-[var(--background)] flex items-center justify-center text-[var(--primary)] font-bold">
-              {currentStep > 1 ? <Check size={16} /> : '1'}
+    <div className="min-h-screen w-full flex flex-col md:flex-row bg-gradient-to-b from-[var(--primary)] to-[var(--primary-dark)]">
+      <div className="hidden md:flex md:w-1/2 flex-col justify-center items-center p-8 text-white">
+        <div className="max-w-md">
+          <h1 className="text-4xl font-bold mb-4">Join Lanceraa</h1>
+          <p className="text-lg opacity-90 mb-6">
+            Connect with top clients and find exciting freelance opportunities that match your skills and interests.
+          </p>
+          <div className="space-y-4 mt-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                <Check className="text-white" size={20} />
+              </div>
+              <p className="opacity-90">Access to thousands of projects</p>
             </div>
-            <div className="h-1 w-12 bg-[var(--background)] mx-2 opacity-60"></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-              currentStep === 2 
-                ? 'bg-[var(--background)] text-[var(--primary)]' 
-                : 'bg-[var(--background)] bg-opacity-40 text-[var(--background)]'
-            }`}>
-              2
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                <Check className="text-white" size={20} />
+              </div>
+              <p className="opacity-90">Secure payment protection</p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                <Check className="text-white" size={20} />
+              </div>
+              <p className="opacity-90">Build your professional profile</p>
             </div>
           </div>
         </div>
-        
-        {/* Alert Message */}
-        {alert.show && (
-          <div className={`mb-4 p-3 rounded-md text-center ${
-            alert.type === 'success' 
-              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-100' 
-              : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-100'
-          }`}>
-            {alert.message}
+      </div>
+      
+      <div className="w-full md:w-1/2 flex items-center justify-center min-h-screen p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 md:p-8">
+          <h2 className="text-2xl font-bold mb-2 text-center text-gray-800 dark:text-white">
+            {currentStep === 1 ? 'Create Your Account' : 'Set Password'}
+          </h2>
+          
+          <div className="flex items-center justify-center mb-6">
+            <div className="flex items-center">
+              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                {currentStep > 1 ? <Check size={16} /> : '1'}
+              </div>
+              <div className="h-1 w-12 bg-gray-300 dark:bg-gray-600 mx-2"></div>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                currentStep === 2 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400'
+              }`}>
+                2
+              </div>
+            </div>
           </div>
-        )}
+          
+          {alert.show && (
+            <div className={`mb-4 p-3 rounded-md text-center text-sm font-medium ${
+              alert.type === 'success' 
+                ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-100' 
+                : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-100'
+            }`}>
+              {alert.message}
+            </div>
+          )}
 
-        {/* Step 1: Email Input */}
-        {currentStep === 1 && (
-          <form onSubmit={handleCheckEmail} className="space-y-4">
-            <div className="text-center mb-4">
-              <p className="text-[var(--background)] opacity-80">
-                Enter your email to get started
-              </p>
-            </div>
-            
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text)]" size={20} />
-              <input
-                type="email"
-                placeholder="Email Address"
-                className="w-full pl-10 pr-4 py-3 rounded-md bg-[var(--background)] text-[var(--text)]"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                required
-                autoFocus
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isCheckingEmail || !formData.email}
-              className="w-full flex items-center justify-center bg-[var(--background)] text-[var(--accent)] py-3 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isCheckingEmail ? 'Checking...' : (
-                <>
-                  Continue
-                  <ArrowRight size={16} className="ml-2" />
-                </>
-              )}
-            </button>
-            
-            <div className="text-center mt-6">
-              <p className="text-[var(--background)] opacity-80 text-sm">
-                Already have an account? <a href="/login" className="underline">Sign in</a>
-              </p>
-            </div>
-          </form>
-        )}
-
-        {/* Step 2: Password Input */}
-        {currentStep === 2 && (
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div className="text-center mb-4">
-              <p className="text-[var(--background)] opacity-80">
-                Create a secure password for {formData.email}
-              </p>
-            </div>
-            
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text)]" size={20} />
-              <input
-                type="password"
-                placeholder="Password"
-                className="w-full pl-10 pr-4 py-3 rounded-md bg-[var(--background)] text-[var(--text)]"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                required
-                autoFocus
-                minLength={8}
-              />
-            </div>
-
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text)]" size={20} />
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                className="w-full pl-10 pr-4 py-3 rounded-md bg-[var(--background)] text-[var(--text)]"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                required
-              />
-            </div>
-
-            {/* Password strength indicator */}
-            {formData.password && (
-              <div className="mb-2">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs text-[var(--background)]">
-                    Password Strength: {
-                      passwordStrength === 0 ? 'Very Weak' :
-                      passwordStrength <= 2 ? 'Weak' :
-                      passwordStrength <= 4 ? 'Moderate' :
-                      'As Strong As You!'
-                    }
-                  </span>
-                  <span className="text-xs text-[var(--background)]">
-                    {passwordStrength}/5
-                  </span>
-                </div>
-                <div className="h-1.5 w-full bg-[var(--background)] bg-opacity-20 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full ${
-                      passwordStrength <= 2 ? 'bg-red-500' : 
-                      passwordStrength <= 4 ? 'bg-yellow-500' : 
-                      'bg-green-500'
-                    }`}
-                    style={{ width: `${(passwordStrength / 5) * 100}%` }}
-                  ></div>
-                </div>
+          {currentStep === 1 && (
+            <form onSubmit={handleCheckEmail} className="space-y-4">
+              <div className="text-center mb-4">
+                <p className="text-gray-600 dark:text-gray-300">
+                  Enter your email to get started
+                </p>
               </div>
-            )}
-
-            {/* Sequential requirement validation */}
-            {formData.password && (
-              <div className="py-1">
-                {(() => {
-                  // First check if any requirement is missing
-                  const missingRequirement = getFirstMissingRequirement()
-                  
-                  if (missingRequirement) {
-                    // Show the first missing requirement
-                    return (
-                      <div className="flex items-center text-xs">
-                        <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-yellow-500 text-white">
-                          <X size={12} />
-                        </span>
-                        <span className="text-[var(--background)]">{missingRequirement.message}</span>
-                      </div>
-                    )
-                  } 
-                  
-                  // If no requirements are missing and confirmation doesn't match
-                  else if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
-                    return (
-                      <div className="flex items-center text-xs">
-                        <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-red-500 text-white">
-                          <X size={12} />
-                        </span>
-                        <span className="text-red-400">Passwords do not match</span>
-                      </div>
-                    )
-                  }
-                  
-                  // If password requirements are met and confirmation password matches
-                  else if (formData.confirmPassword && formData.password === formData.confirmPassword) {
-                    return (
-                      <div className="flex items-center text-xs">
-                        <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-[var(--accent)] text-white">
-                          <Check size={12} />
-                        </span>
-                        <span className="text-[var(--accent)]">You're good to go!</span>
-                      </div>
-                    )
-                  }
-                  
-                  // If password requirements are met but no confirmation password yet
-                  else if (Object.values(passwordValidation).every(Boolean)) {
-                    return (
-                      <div className="flex items-center text-xs">
-                        <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-green-500 text-white">
-                          <Check size={12} />
-                        </span>
-                        <span className="text-[var(--background)]">Password meets all requirements. Please confirm it.</span>
-                      </div>
-                    )
-                  }
-                  
-                  return null
-                })()}
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={handleBack}
-                className="w-12 flex items-center justify-center bg-[var(--background)] bg-opacity-50 text-[var(--text)] py-3 rounded-md hover:bg-opacity-60 transition-opacity"
-              >
-                <ArrowLeft size={16} />
-              </button>
               
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={20} />
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  required
+                  autoFocus
+                />
+              </div>
+
               <button
                 type="submit"
-                disabled={
-                  isSubmitting || 
-                  !formData.password || 
-                  !formData.confirmPassword ||
-                  formData.password !== formData.confirmPassword ||
-                  !Object.values(passwordValidation).every(Boolean)
-                }
-                className="flex-1 flex items-center justify-center bg-[var(--background)] text-[var(--accent)] py-3 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isCheckingEmail || !formData.email}
+                className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Creating Account...' : 'Create Account'}
+                {isCheckingEmail ? 'Checking...' : (
+                  <>
+                    Continue
+                    <ArrowRight size={16} className="ml-2" />
+                  </>
+                )}
               </button>
-            </div>
-          </form>
-        )}
+              
+              <div className="text-center mt-6">
+                <p className="text-gray-600 dark:text-gray-300 text-sm">
+                  Already have an account? <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:underline">Sign in</Link>
+                </p>
+              </div>
+            </form>
+          )}
+
+          {currentStep === 2 && (
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="text-center mb-4">
+                <p className="text-gray-600 dark:text-gray-300">
+                  Create a secure password for {formData.email}
+                </p>
+              </div>
+              
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={20} />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  required
+                  autoFocus
+                  minLength={8}
+                />
+              </div>
+
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" size={20} />
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                  required
+                />
+              </div>
+
+              {formData.password && (
+                <div className="mb-2">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-gray-600 dark:text-gray-300">
+                      Password Strength: {
+                        passwordStrength === 0 ? 'Very Weak' :
+                        passwordStrength <= 2 ? 'Weak' :
+                        passwordStrength <= 4 ? 'Moderate' :
+                        'As Strong As You!'
+                      }
+                    </span>
+                    <span className="text-xs text-gray-600 dark:text-gray-300">
+                      {passwordStrength}/5
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full ${
+                        passwordStrength <= 2 ? 'bg-red-500' : 
+                        passwordStrength <= 4 ? 'bg-yellow-500' : 
+                        'bg-green-500'
+                      }`}
+                      style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
+              {formData.password && (
+                <div className="py-1">
+                  {(() => {
+                    const missingRequirement = getFirstMissingRequirement()
+                    
+                    if (missingRequirement) {
+                      return (
+                        <div className="flex items-center text-xs">
+                          <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-yellow-500 text-white">
+                            <X size={12} />
+                          </span>
+                          <span className="text-gray-700 dark:text-gray-300 font-medium drop-shadow-sm">
+                            {missingRequirement.message}
+                          </span>
+                        </div>
+                      )
+                    } 
+                    
+                    else if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
+                      return (
+                        <div className="flex items-center text-xs">
+                          <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-red-500 text-white">
+                            <X size={12} />
+                          </span>
+                          <span className="text-red-600 dark:text-red-400 font-medium drop-shadow-sm">
+                            Passwords do not match
+                          </span>
+                        </div>
+                      )
+                    }
+                    
+                    else if (formData.confirmPassword && formData.password === formData.confirmPassword) {
+                      return (
+                        <div className="flex items-center text-xs">
+                          <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-blue-600 text-white">
+                            <Check size={12} />
+                          </span>
+                          <span className="text-blue-600 dark:text-blue-400 font-medium drop-shadow-sm">
+                            You're good to go!
+                          </span>
+                        </div>
+                      )
+                    }
+                    
+                    else if (Object.values(passwordValidation).every(Boolean)) {
+                      return (
+                        <div className="flex items-center text-xs">
+                          <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-green-500 text-white">
+                            <Check size={12} />
+                          </span>
+                          <span className="text-gray-700 dark:text-gray-300 font-medium drop-shadow-sm">
+                            Password meets all requirements. Please confirm it.
+                          </span>
+                        </div>
+                      )
+                    }
+                    
+                    return null
+                  })()}
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="w-12 flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <ArrowLeft size={16} />
+                </button>
+                
+                <button
+                  type="submit"
+                  disabled={
+                    isSubmitting || 
+                    !formData.password || 
+                    !formData.confirmPassword ||
+                    formData.password !== formData.confirmPassword ||
+                    !Object.values(passwordValidation).every(Boolean)
+                  }
+                  className="flex-1 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Creating Account...' : 'Create Account'}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   )
