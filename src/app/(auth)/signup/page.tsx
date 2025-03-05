@@ -396,7 +396,7 @@ export default function SignupPage() {
 
             {/* Sequential requirement validation */}
             {formData.password && (
-              <div className="bg-[var(--background)] bg-opacity-10 rounded-md p-3">
+              <div className="py-1">
                 {(() => {
                   // First check if any requirement is missing
                   const missingRequirement = getFirstMissingRequirement()
@@ -408,7 +408,7 @@ export default function SignupPage() {
                         <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-yellow-500 text-white">
                           <X size={12} />
                         </span>
-                        <span className="text-[var(--text)]">{missingRequirement.message}</span>
+                        <span className="text-[var(--background)]">{missingRequirement.message}</span>
                       </div>
                     )
                   } 
@@ -444,7 +444,7 @@ export default function SignupPage() {
                         <span className="flex-shrink-0 flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-green-500 text-white">
                           <Check size={12} />
                         </span>
-                        <span className="text-[var(--text)]">Password meets all requirements. Please confirm it.</span>
+                        <span className="text-[var(--background)]">Password meets all requirements. Please confirm it.</span>
                       </div>
                     )
                   }
