@@ -91,9 +91,12 @@ export default function SignupPage() {
     return null;
   };
 
-  const debounce = (func: Function, delay: number) => {
+  const debounce = <T extends (...args: any[]) => any>(
+    func: T,
+    delay: number
+  ) => {
     let timeout: NodeJS.Timeout;
-    return (...args: any[]) => {
+    return (...args: Parameters<T>) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => func(...args), delay);
     };
@@ -151,7 +154,7 @@ export default function SignupPage() {
       // Clean up any pending debounced calls
       setIsCheckingAvailability(false);
     };
-  }, [formData.email]);
+  }, [formData.email, isEmailAvailable]);
 
   const handleCheckEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -670,7 +673,7 @@ export default function SignupPage() {
                                 <Check size={12} />
                               </span>
                               <span className="text-[var(--accent)] font-medium drop-shadow-sm">
-                                You're good to go!
+                                You&apos;re good to go!
                               </span>
                             </div>
                           );
