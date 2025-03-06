@@ -535,7 +535,7 @@ export default function SignupPage() {
                         href="/login"
                         className="text-[var(--accent)] hover:underline"
                       >
-                        Sign in
+                        login
                       </Link>
                     </p>
                   </div>
