@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Mail, Lock, ArrowRight, Check, ArrowLeft, X } from "lucide-react";
+import { Mail, Lock, ArrowRight, Check, ArrowLeft, X, Edit2 } from "lucide-react";
 import { config } from "@/config";
 import Link from "next/link";
 
@@ -558,8 +558,21 @@ export default function SignupPage() {
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="text-center mb-4">
                     <p className="text-[var(--text)] text-opacity-80">
-                      Create a secure password for {formData.email}
+                      Create a secure password for
                     </p>
+                  </div>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text)] text-opacity-60" size={20} />
+                    <div className="w-full pl-10 pr-10 py-3 rounded-lg border border-[var(--text)] border-opacity-20 bg-[var(--background)] text-[var(--text)] flex items-center justify-between">
+                      <span className="truncate">{formData.email}</span>
+                      <button 
+                        type="button" 
+                        onClick={handleBack}
+                        className="text-[var(--accent)] hover:text-[var(--accent)] hover:underline"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="relative">
