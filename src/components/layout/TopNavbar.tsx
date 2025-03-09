@@ -1,11 +1,13 @@
-'use client'
+"use client";
 
 import Link from "next/link";
 import { Sun, Moon, UserRoundPlus, Search, Bell, X } from "lucide-react";
 import { useThemeContext } from "@/components/theme-provider";
 import { useAuth } from "@/context/auth-context";
 import { useState, useEffect, useRef } from "react";
-import { usePathname } from 'next/navigation';
+import { usePathname } from "next/navigation";
+import Image from "next/image";
+import Logo from "@/assets/images/logo.png"; // Import logo
 
 export default function TopNavbar() {
   const { theme, toggleTheme } = useThemeContext();
@@ -24,24 +26,27 @@ export default function TopNavbar() {
   ];
 
   const getSearchPlaceholder = () => {
-    switch(pathname) {
-      case '/works':
-        return 'Search for works...';
-      case '/freelancers':
-        return 'Search for freelancers...';
+    switch (pathname) {
+      case "/works":
+        return "Search for works...";
+      case "/freelancers":
+        return "Search for freelancers...";
       default:
-        return 'Search Lanceraa...';
+        return "Search Lanceraa...";
     }
   };
 
   const getInitials = (name?: string) => {
-    if (!name) return '?';
+    if (!name) return "?";
     return name.charAt(0).toUpperCase();
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
         setIsSearchOpen(false);
       }
     };
@@ -66,18 +71,26 @@ export default function TopNavbar() {
   }, [lastScrollY]);
 
   return (
-    <nav 
+    <nav
       className={`fixed w-full top-0 left-0 right-0 
         bg-[var(--background)]/80 backdrop-blur-md text-[var(--text)] 
         z-50 transition-all duration-300
-        ${isVisible ? 'translate-y-0' : '-translate-y-full'}
-        ${theme === 'dark' ? 'shadow-[0_2px_10px_rgba(0,0,0,0.3)]' : 'shadow-sm'}`}
+        ${isVisible ? "translate-y-0" : "-translate-y-full"}
+        ${
+          theme === "dark" ? "shadow-[0_2px_10px_rgba(0,0,0,0.3)]" : "shadow-sm"
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-[var(--accent)] rounded-full" />
+            <Image
+              src={Logo}
+              alt="Lanceraa Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+            />
             <span className="font-bold text-xl text-[var(--text)] transition duration-300 hover:text-[var(--accent)]">
               Lanceraa
             </span>
@@ -135,7 +148,7 @@ export default function TopNavbar() {
                 transition-all duration-300 transform hover:scale-105"
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? (
+              {theme === "dark" ? (
                 <Sun className="h-5 w-5" />
               ) : (
                 <Moon className="h-5 w-5" />
@@ -151,7 +164,7 @@ export default function TopNavbar() {
                   <Bell className="h-6 w-6" />
                 </button>
                 <Link href="/profile">
-                  <div 
+                  <div
                     className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center text-white"
                     title={user.fullName || user.username}
                   >
