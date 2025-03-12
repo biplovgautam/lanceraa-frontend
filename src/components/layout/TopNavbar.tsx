@@ -20,7 +20,7 @@ export default function TopNavbar() {
 
   const NavLinks = [
     { id: 1, title: "Home", href: "/" },
-    { id: 2, title: "Freelancers", href: "/freelancers" },
+    { id: 2, title: "Lancers", href: "/lancers" },
     { id: 3, title: "Works", href: "/works" },
     { id: 4, title: "Profile", href: "/profile" },
   ];
@@ -29,8 +29,8 @@ export default function TopNavbar() {
     switch (pathname) {
       case "/works":
         return "Search for works...";
-      case "/freelancers":
-        return "Search for freelancers...";
+      case "/lancers":
+        return "Search for Lancers...";
       default:
         return "Search Lanceraa...";
     }

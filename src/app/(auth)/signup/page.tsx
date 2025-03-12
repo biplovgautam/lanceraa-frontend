@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Mail, Lock, ArrowRight, Check, ArrowLeft, X, Edit2 } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  ArrowRight,
+  Check,
+  ArrowLeft,
+  X,
+  Edit2,
+} from "lucide-react";
 import { config } from "@/config";
 import Link from "next/link";
 
@@ -18,6 +26,7 @@ export default function SignupPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    is_client: true, // Default to client
   });
 
   const [alert, setAlert] = useState({
@@ -249,6 +258,7 @@ export default function SignupPage() {
         email: formData.email,
         password: formData.password,
         confirm_password: formData.confirmPassword,
+        is_client: formData.is_client, // Include is_client field
       };
 
       const apiEndpoint = `${config.apiUrl}/api/auth/signup/initial`;
@@ -287,6 +297,10 @@ export default function SignupPage() {
         });
 
         localStorage.setItem("verification_user_id", data.user_id);
+        localStorage.setItem(
+          "user_role",
+          formData.is_client ? "client" : "talent"
+        );
 
         console.log(
           "Signup successful, redirecting to verification with user_id:",
@@ -508,6 +522,66 @@ export default function SignupPage() {
                       </div>
                     )}
                   </div>
+                  {/* Role selection section */}
+                  <div className="p-4 rounded-lg border border-[var(--text)] border-opacity-20">
+                    <h3 className="font-medium text-sm mb-2 text-[var(--text)]">
+                      I want to join as:
+                    </h3>
+                    <div className="space-y-3">
+                      <label
+                        className={`flex items-start p-3 rounded-lg cursor-pointer transition-all ${
+                          formData.is_client
+                            ? "bg-[var(--accent)]/10 border border-[var(--accent)]"
+                            : "bg-[var(--background)] hover:bg-[var(--text)]/5 border border-[var(--text)]/20"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="role"
+                          className="mt-1"
+                          checked={formData.is_client}
+                          onChange={() =>
+                            setFormData({ ...formData, is_client: true })
+                          }
+                        />
+                        <div className="ml-3">
+                          <div className="font-medium text-[var(--text)]">
+                            Client
+                          </div>
+                          <div className="text-xs text-[var(--text)]/70">
+                            I want to hire talents and get my projects done
+                          </div>
+                        </div>
+                      </label>
+
+                      <label
+                        className={`flex items-start p-3 rounded-lg cursor-pointer transition-all ${
+                          !formData.is_client
+                            ? "bg-[var(--accent)]/10 border border-[var(--accent)]"
+                            : "bg-[var(--background)] hover:bg-[var(--text)]/5 border border-[var(--text)]/20"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="role"
+                          className="mt-1"
+                          checked={!formData.is_client}
+                          onChange={() =>
+                            setFormData({ ...formData, is_client: false })
+                          }
+                        />
+                        <div className="ml-3">
+                          <div className="font-medium text-[var(--text)]">
+                            Talent
+                          </div>
+                          <div className="text-xs text-[var(--text)]/70">
+                            I want to find work and offer my professional
+                            services
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
 
                   {/* Continue button with proper validation */}
                   <button
@@ -562,11 +636,14 @@ export default function SignupPage() {
                     </p>
                   </div>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text)] text-opacity-60" size={20} />
+                    <Mail
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text)] text-opacity-60"
+                      size={20}
+                    />
                     <div className="w-full pl-10 pr-10 py-3 rounded-lg border border-[var(--text)] border-opacity-20 bg-[var(--background)] text-[var(--text)] flex items-center justify-between">
                       <span className="truncate">{formData.email}</span>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={handleBack}
                         className="text-[var(--accent)] hover:text-[var(--accent)] hover:underline"
                       >

@@ -45,11 +45,12 @@ const PUBLIC_PATHS = [
   '/reset-password',
 ];
 
+// Update the auth context to properly handle token validation
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   
@@ -67,84 +68,134 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
   
+  // Add this function to check if current route is protected or public
+  const getRouteType = useCallback((path: string) => {
+    if (!path) return 'unknown';
+    
+    // Check for public auth routes
+    for (const publicPath of PUBLIC_PATHS) {
+      if (path === publicPath || path.startsWith(`${publicPath}/`)) {
+        return 'public';
+      }
+    }
+    
+    // Check for protected routes that need auth
+    for (const protectedPath of PROTECTED_PATHS) {
+      if (path === protectedPath || path.startsWith(`${protectedPath}/`)) {
+        return 'protected';
+      }
+    }
+    
+    return 'default';
+  }, []);
+  
   // Log pathname for debugging
   useEffect(() => {
     console.log('Current pathname:', pathname);
     console.log('Is protected path:', isProtectedPath(pathname || ''));
   }, [pathname, isProtectedPath]);
 
-  // Check auth status on mount
+  // Load user data on initial mount and verify token validity
   useEffect(() => {
-    // Skip auth check if this is likely a 404 page (no route)
-    if (pathname && !PUBLIC_PATHS.includes(pathname) && !PROTECTED_PATHS.some(p => pathname.startsWith(p))) {
-      console.log('Unknown path pattern, might be 404:', pathname)
-      setIsLoading(false)
-      return // Don't redirect
-    }
-    
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (!token) {
-      setIsLoading(false);
-      setIsAuthenticated(false);
+    const loadUserFromLocalStorage = () => {
+      console.log("Attempting to load user from localStorage");
       
-      // Only redirect if on a protected path
-      if (pathname && isProtectedPath(pathname)) {
-        console.log('No token, redirecting from protected path:', pathname);
-        router.push('/login');
-      }
-      return;
-    }
-    
-    // Try to use stored user data first for quicker loading
-    if (storedUser) {
       try {
-        const userData = JSON.parse(storedUser);
-        setUser(userData);
-        setIsAuthenticated(true);
-      } catch (err) {
-        console.error('Failed to parse stored user data:', err);
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+        
+        if (token && storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          setIsAuthenticated(true);
+          console.log("User loaded from localStorage, will verify with API");
+          return true;
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+          console.log("No auth data found in localStorage");
+          return false;
+        }
+      } catch (error) {
+        console.error("Error loading user from localStorage:", error);
+        setIsAuthenticated(false);
+        setUser(null);
+        return false;
       }
-    }
+    };
 
-    // Then verify with the server
     const checkAuth = async () => {
+      setIsLoading(true);
+      
+      // First load from localStorage
+      const hasLocalData = loadUserFromLocalStorage();
+      
+      if (!hasLocalData) {
+        setIsLoading(false);
+        return;
+      }
+      
+      // If we have a token, verify it with the server
       try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        
+        // Try to get user profile with token
         const response = await fetch(`${API_URL}/api/auth/me`, {
+          method: "GET",
           headers: {
-            'Authorization': `Bearer ${token}`
+            "Authorization": `Bearer ${token}`
           }
         });
         
         if (response.ok) {
           const data = await response.json();
-          setUser(data.user);
+          // Update user data with latest from server
+          setUser(data.user);  // Make sure to extract 'user' from response
           setIsAuthenticated(true);
-          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem("user", JSON.stringify(data.user));
+          console.log("Token verified with server");
         } else {
-          console.log('Auth check failed, clearing token');
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          // Token is invalid
+          console.log("Auth check failed, clearing token");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
           setIsAuthenticated(false);
-          
-          // Only redirect if on a protected path
-          if (pathname && isProtectedPath(pathname)) {
-            router.push('/login');
-          }
         }
-      } catch (err) {
-        console.error('Auth check failed:', err);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setIsAuthenticated(false);
+      } catch (error) {
+        console.error("Error verifying token:", error);
+        // Don't clear token on network errors to allow offline usage
       } finally {
         setIsLoading(false);
       }
     };
-
+    
     checkAuth();
-  }, [API_URL, router, pathname, isProtectedPath]);
+    
+    // Setup event listener for auth changes
+    const handleAuthChange = () => {
+      console.log("Auth state change detected via custom event");
+      checkAuth();
+    };
+    
+    window.addEventListener('authStateChanged', handleAuthChange);
+    
+    // Also listen for storage events (works across tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "token" || e.key === "user") {
+        console.log("Storage changed, reloading auth state");
+        checkAuth();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('authStateChanged', handleAuthChange);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [API_URL]); // Remove router and pathname dependencies to prevent redirects
 
   const login = useCallback(async (username: string, password: string) => {
     setError(null);
@@ -235,6 +286,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
     router.push('/login');
   }, [API_URL, router]);
+
+  // Add this debugging section to your AuthProvider component
+  useEffect(() => {
+    console.log("🔄 Auth context state updated:", { user, isAuthenticated });
+    
+    // Debug what's in localStorage
+    console.log("📂 localStorage content:", {
+      token: localStorage.getItem("token"),
+      user: localStorage.getItem("user")
+    });
+  }, [user, isAuthenticated]);
 
   return (
     <AuthContext.Provider value={{ 
