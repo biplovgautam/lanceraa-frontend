@@ -113,57 +113,66 @@ export default function SignupPage() {
 
   const lastCheckedEmail = useRef("");
 
-  useEffect(() => {
-    // Skip checking if email is invalid or unchanged from last check
-    if (!formData.email || !isValidEmail(formData.email)) {
-      setIsEmailAvailable(null);
-      return;
-    }
+  // Update the useEffect that handles email checking
+useEffect(() => {
+  // Skip checking if email is invalid or empty
+  if (!formData.email || !isValidEmail(formData.email)) {
+    setIsEmailAvailable(null);
+    return;
+  }
 
-    // Store the current email for comparison
-    const currentEmail = formData.email;
+  // Skip if we've already checked this exact email
+  if (isEmailAvailable !== null && formData.email === lastCheckedEmail.current) {
+    return;
+  }
 
-    // Skip if we've already checked this exact email
-    if (
-      isEmailAvailable !== null &&
-      currentEmail === lastCheckedEmail.current
-    ) {
-      return;
-    }
+  // Save the current email for debounce check
+  const currentEmail = formData.email;
 
-    const checkEmailAvailability = async () => {
-      setIsCheckingAvailability(true);
-      try {
-        const apiEndpoint = `${config.apiUrl}/api/auth/check-email`;
-        const response = await fetch(apiEndpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: currentEmail }),
-        });
+  // Create a debounced function with 500ms delay
+  const checkEmail = async () => {
+    setIsCheckingAvailability(true);
+    try {
+      const apiEndpoint = `${config.apiUrl}/api/auth/check-email`;
+      const response = await fetch(apiEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: currentEmail }),
+      });
 
-        const data = await response.json();
+      const data = await response.json();
+      
+      // Only update if the email is still the same (user might have changed it again)
+      if (currentEmail === formData.email) {
         setIsEmailAvailable(data.exists === false);
-
-        // Update the last checked email
         lastCheckedEmail.current = currentEmail;
-      } catch (error) {
-        console.error("Error checking email availability:", error);
-        setIsEmailAvailable(null);
-      } finally {
+      }
+    } catch (error) {
+      console.error("Error checking email availability:", error);
+      setIsEmailAvailable(null);
+    } finally {
+      if (currentEmail === formData.email) {
         setIsCheckingAvailability(false);
       }
-    };
+    }
+  };
 
-    const debouncedCheck = debounce(checkEmailAvailability, 500);
-    debouncedCheck();
+  // Set up the timer with clear delay
+  const timer = setTimeout(checkEmail, 500);
+  
+  // Clean up function to cancel any pending checks if component unmounts
+  // or if the email changes before the timeout completes
+  return () => {
+    clearTimeout(timer);
+  };
+}, [formData.email]);
 
-    return () => {
-      // Clean up any pending debounced calls
-      setIsCheckingAvailability(false);
-    };
-  }, [formData.email, isEmailAvailable]);
+
+
+
+
 
   const handleCheckEmail = async (e: React.FormEvent) => {
     e.preventDefault();
